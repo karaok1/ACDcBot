@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
+const findOrCreate = require('mongoose-find-or-create')
 
 const PostSchema = mongoose.Schema({
     discordId: {
@@ -8,15 +9,16 @@ const PostSchema = mongoose.Schema({
     },
     playerId: {
         type: String,
-        required: true,
+        required: false,
         unique: true
     },
-    date: {
+    expirationDate: {
         type: Date,
         default: Date.now()
     },
 });
 
 PostSchema.plugin(uniqueValidator)
+PostSchema.plugin(findOrCreate)
 
 module.exports = mongoose.model('Post', PostSchema)

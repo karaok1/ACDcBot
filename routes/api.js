@@ -63,20 +63,16 @@ router.patch('/:postId', async (req, res) => {
     }
 })
 
-router.post('/checkRole', function (req, res) {
-
-    const today = new Date()
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
+router.post('/checkRole', async (req, res) => {
 
     const response = {
-        userId: req.body.id,
+        discordId: req.body.discordId,
     };
 
     const guild = client.guilds.find(guild => guild.id === process.env.GUILD_ID)
+    let member = guild.members.get(req.body.discordId); // member ID
 
     if (guild != null) {
-        let member = guild.members.get(req.body.id); // member ID
         if (member && member.roles) {
             response.hasRole = member.roles.has(process.env.ROLE_ID); // Dev ID
             console.log('Member is a BetaTester!');
@@ -89,6 +85,16 @@ router.post('/checkRole', function (req, res) {
         console.log(err)
         res.send(err)
     }
+    Post.findOneAndUpdate(
+        { discordId: member }, 
+        { $set: { expirationDate: trialFinish }}, 
+        { upsert: true, new: true }, 
+        (err) => {
+            console.log(err)
+        })
+        .then((doc) => {
+            console.log(doc)
+    })
 })
 
 module.exports = router
