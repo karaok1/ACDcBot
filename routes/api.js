@@ -15,7 +15,8 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
     const post = new Post({
         discordId: req.body.discordId,
-        playerId: req.body.playerId
+        playerId: req.body.playerId,
+        expirationDate: Date.now()
     })
 
     try {
@@ -63,38 +64,54 @@ router.patch('/:postId', async (req, res) => {
     }
 })
 
-router.post('/checkRole', async (req, res) => {
+router.post('/checkRole', (req, res) => {
 
     const response = {
         discordId: req.body.discordId,
+        playerId: req.body.playerId,
+        hasRole: null,
+        trialExpired: null,
+        error: null
     };
 
     const guild = client.guilds.find(guild => guild.id === process.env.GUILD_ID)
     let member = guild.members.get(req.body.discordId); // member ID
 
-    if (guild != null) {
-        if (member && member.roles) {
-            response.hasRole = member.roles.has(process.env.ROLE_ID); // Dev ID
-            console.log('Member is a BetaTester!');
-        } else {
-            console.log('There is no such member with an ID of: \'', req.body.id, '\'')
-        }
+    if (guild == null) {
+        response.error = 'Invalid guild!'
+        console.log(response.error)
+        res.send(response)
+        return;
     }
-    else {
-        let err = 'Invalid guild!'
-        console.log(err)
-        res.send(err)
+
+    if (!member || !member.roles) 
+    {
+        response.error = 'There is no such member with an ID of: \'', req.body.id, '\''
+        console.log(response.error)
+        res.send(response)
+        return;
     }
-    Post.findOneAndUpdate(
-        { discordId: member }, 
-        { $set: { expirationDate: trialFinish }}, 
-        { upsert: true, new: true }, 
-        (err) => {
-            console.log(err)
+        
+    Post.findOne(
+        { discordId: req.body.discordId }, 
+        { useFindOneAndModify: false },
+        (err, doc) => {
+            if (err != null) {
+                res.send(err)
+                return;
+            } 
+
+            response.hasRole = member.roles.has(process.env.TRIAL_ID); // Trial ID
+            if (response.hasRole) {
+                response.trialExpired = doc.expirationDate < Date.now() ? true : false;
+                if (response.trialexpired) {
+                    member.removeRole(process.env.TRIAL_ID) 
+                }
+            } 
         })
         .then((doc) => {
-            console.log(doc)
-    })
+            res.send(response)
+        })
 })
 
 module.exports = router

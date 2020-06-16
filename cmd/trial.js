@@ -30,31 +30,61 @@ exports.run = (client, message, params) => {
 
     let trialuser = new Discord.RichEmbed()
         .setTitle("Already a premium member!")
+        .setImage("https://i.pinimg.com/564x/e9/33/f8/e933f8b55c9de86fb8c832428e943e03.jpg")
+
+    let alreadyused = new Discord.RichEmbed()
+        .setTitle(" Trial expired or already used.")
+        .setFooter( `${message.author.tag} `)
+        .setImage("https://66.media.tumblr.com/tumblr_m5yig6JjC61roq0rxo1_500.gif")
 
     let member = message.member
-    if (!member.roles.has(process.env.MEMBER_ROLE_ID)) {
-        member.addRole(process.env.MEMBER_ROLE_ID)
-        .then(() => {
-            member.guild.channels.find(channel => channel.id === process.env.WELCOME_CHANNEL_ID)
-                .send(trialembed)
-
-            Post.findOneAndUpdate(
-                { discordId: member.id }, 
-                { $set: { expirationDate: trialFinish }}, 
-                { upsert: true, new: true }, 
-                (err) => {
+    if (!member.roles.has(process.env.TRIAL_ID)) {
+        Post.collection.dropIndexes(function (err, results) {
+            console.log(results)
+        });
+        Post.findOne(
+            { discordId: member.id },
+            { useFindAndModify: false },
+            (err, doc) => {
+                if (err) {
                     console.log(err)
-                })
-                .then((doc) => {
-                    console.log(doc)
+                } 
+                else if (doc && doc.trialUsed) {
+                    member.guild.channels
+                        .find(channel => channel.id === process.env.WELCOME_CHANNEL_ID)
+                        .send(message.author, alreadyused)
+                }
+                else {
+                    Post.findOneAndUpdate(
+                        { discordId: member.id }, 
+                        { 
+                            $set: { 
+                                expirationDate: trialFinish, 
+                                trialUsed: true 
+                            }
+                        },
+                        { upsert: true, new: true }, 
+                        (err) => {
+                            console.log(err)
+                        })
+                        .then((doc) => {
+                            member.addRole(process.env.TRIAL_ID)
+                                .then(() => {
+                                    member.guild.channels.find(channel => channel.id === process.env.WELCOME_CHANNEL_ID)
+                                        .send(trialembed)
+                                    }).catch((error) => log(error))
+                            console.log(doc)
+                    })
+                }
             })
-        }).catch((error) => log(error))
+        }
+        else {
+            member.guild.channels.find(channel => channel.id === process.env.WELCOME_CHANNEL_ID)
+                .send(trialuser)
+            return;
+        }
+
     }
-    else {
-        member.guild.channels.find(channel => channel.id === process.env.WELCOME_CHANNEL_ID)
-            .send(trialuser)
-    }
-}
 
 exports.conf = {
     enabled: true,

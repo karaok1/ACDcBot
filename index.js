@@ -11,6 +11,7 @@ global.client = client;
 require('dotenv/config')
 
 mongoose.set('useCreateIndex', true);
+mongoose.set('debug', true)
 // Connect to DB
 mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true })
 
@@ -55,7 +56,7 @@ client.on("ready", () => {
     res.send('Home')
   })
 
-  app.listen(8080, () => console.log('app started'));
+  app.listen(5000, () => console.log('app started'));
 });
 
 client.on("guildCreate", guild => {
@@ -112,7 +113,6 @@ client.on("message", async message => {
     cmd.run(client, message, args, perms, config.prefix);
   }
 });
-
 client.login(config.token);
 
 client.elevation = function (msg) {

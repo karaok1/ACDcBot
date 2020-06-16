@@ -10,15 +10,21 @@ const PostSchema = mongoose.Schema({
     playerId: {
         type: String,
         required: false,
-        unique: true
+        unique: true,
+        sparse: true,
     },
     expirationDate: {
         type: Date,
         default: Date.now()
     },
+    trialUsed: {
+        type: Boolean,
+        default: false
+    }
 });
 
 PostSchema.plugin(uniqueValidator)
 PostSchema.plugin(findOrCreate)
+
 
 module.exports = mongoose.model('Post', PostSchema)
