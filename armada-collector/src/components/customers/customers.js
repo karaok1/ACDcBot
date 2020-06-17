@@ -19,18 +19,23 @@ class Customers extends Component {
 
   render() {
     var users = this.state.customers.map(customer => 
-      <React.Fragment key={customer._id}>
-        <Grid item xs={6}>
-          {customer.expirationDate}
+        <Grid container>
+        <React.Fragment key={customer._id}>
+            <Grid item xs={4}>
+              {customer.discordId}
+            </Grid>
+            <Grid item xs={4}>
+              {customer.expirationDate} 
+            </Grid>
+            <Grid item xs={4}>
+              Used: {customer.trialUsed ? 'Used' : 'Not used'}
+            </Grid>
+        </React.Fragment>
         </Grid>
-      </React.Fragment>
     )
     return (
       <div>
-        <h2>Customers</h2>
-        <Grid container>
         {users}
-        </Grid>
       </div>
     )
   }
