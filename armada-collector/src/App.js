@@ -1,10 +1,10 @@
 import React, { Component, Fragment } from 'react'
 import Customers from './components/customers/customers'
-import Header from './components/Header'
+import Header from './views/Header'
 import Image from './components/img/background.jpg'
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { withStyles } from "@material-ui/core/styles";
-import Content from './components/Content'
+import Content from './views/Content'
 
 const styles = theme => ({
 	"@global": {

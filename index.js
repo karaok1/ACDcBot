@@ -6,9 +6,37 @@ const fs = require("fs");
 const moment = require("moment");
 const express = require('express');
 const log = require('./logger')
+const session = require('express-session')
+const passport = require('passport')
+const discordStrategy = require('./src/strategies/discordstrategy')
 global.client = client;
 
 require('dotenv/config')
+
+app = express()
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(session({
+  secret: 'some random secret',
+  cookie: {
+    maxAge: 60000 * 60 * 24
+  },
+  saveUninitialized: false
+}))
+
+app.use(passport.initialize())
+app.use(passport.session())
+// Routes
+app.get('/', (req, res) => {
+  res.send('Home')
+})
+
+app.listen(5000, () => console.log('app started'));
+const authRoute = require('./src/routes/auth.js')
+const postsRoute = require('./src/routes/api')
+app.use('/auth', authRoute)
+app.use('/api', postsRoute)
+
 
 mongoose.set('useCreateIndex', true);
 mongoose.set('debug', true)
@@ -23,11 +51,11 @@ client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
 client.events = new Discord.Collection();
 
-fs.readdir("./cmd/", (err, files) => {
+fs.readdir("./src/cmd/", (err, files) => {
   if (err) console.error(err);
   log(`Loading a total of ${files.length} commands.`);
   files.forEach(f => {
-    let props = require(`./cmd/${f}`);
+    let props = require(`./src/cmd/${f}`);
     log(`Loading Command: ${props.help.name}`);
     client.commands.set(props.help.name, props);
     props.conf.aliases.forEach(alias => {
@@ -45,18 +73,6 @@ client.on("ready", () => {
   // Example of changing the bot's playing game to something useful. `client.user` is what the
   // docs refer to as the "ClientUser".
   client.user.setActivity(`with ships`);
-  const postsRoute = require('./routes/api')
-  app = express()
-  app.use(express.urlencoded({ extended: true }));
-  app.use(express.json());
-  app.use('/api', postsRoute)
-    
-  // Routes
-  app.get('/', (req, res) => {
-    res.send('Home')
-  })
-
-  app.listen(5000, () => console.log('app started'));
 });
 
 client.on("guildCreate", guild => {

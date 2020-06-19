@@ -1,5 +1,5 @@
 import React from 'react'
-import { AppBar, Toolbar, Typography, Button } from '@material-ui/core'
+import { AppBar, Toolbar, Typography, Button, Container } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
@@ -11,11 +11,13 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
       flexGrow: 1,
+      fontWeight: 'fontWeightBold'
     },
     appBar: {
-        // background: '#2E3B55', 
-        background: 'rgba(0, 0, 0, 0.5)', 
-        alignItems: "center"
+        background: 'rgba(236, 137, 23, .3)', 
+    },
+    appBarContainer: {
+      marginLeft: '40px',
     }
   }))
 
@@ -25,11 +27,12 @@ function Header() {
     return(
         <AppBar position="static" className={classes.appBar}>
             <Toolbar>
+              <Container className={classes.appBarContainer}>
                 <Typography variant="h3" className={classes.title}>
                     ArmadaCollector
                 </Typography>
-                <Button className={classes.buttonStyles}>Login</Button>
-
+              </Container>
+              <Button color="inherit">Login</Button>
             </Toolbar>
         </AppBar>
 

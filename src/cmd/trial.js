@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const log = require('../logger')
+const log = require('../../logger')
 const Post = require('../models/Post')
 
 Date.prototype.addDays = function(days) {
